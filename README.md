@@ -172,5 +172,5 @@ Gesture detection is heuristic-based and may vary with hand orientation
 This is a simulation only — no real vehicle or audio system integration
 
 Project Structure
-├── gesture_car_control.py
+├── car_control.py
 └── README.md
