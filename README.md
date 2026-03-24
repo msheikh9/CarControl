@@ -1,176 +1,102 @@
-Car Control System
-Real-Time Hand Gesture Interface using OpenCV & MediaPipe
+# Gesture Car Control
 
-Overview
+Real-time hand gesture interface for car-style controls — volume, music, and calls — using OpenCV and MediaPipe. No touch required.
 
-This project is a real-time hand gesture recognition system that simulates car-style controls using a webcam. It uses MediaPipe Hands for landmark detection and OpenCV for video processing and UI rendering.
+---
 
-The system allows users to control volume, switch music tracks, and manage calls using simple hand gestures. All interactions are touch-free and processed live from the camera feed.
+## Requirements
 
-Features
-
-Real-time hand tracking (single hand)
-
-Gesture-based volume control
-
-Gesture-based music track navigation
-
-Simulated incoming call handling
-
-On-screen UI with volume bar and status display
-
-Cooldown protection to prevent repeated gesture triggers
-
-Automatic camera fallback (tries multiple camera indices)
-
-Technologies Used
-
-Python 3.8+
-
-OpenCV
-
-MediaPipe Hands
-
-Standard Python libraries (math, time)
-
-Installation
-
-Create a virtual environment (recommended)
-
-Install required packages:
-
+- Python 3.8+
+- `opencv-python`
+- `mediapipe`
+```bash
 pip install opencv-python mediapipe
+```
 
-Running the Application
+---
 
-Save the script as:
-
-gesture_car_control.py
-
-Run:
-
+## Usage
+```bash
 python gesture_car_control.py
+```
 
-Press:
+| Key | Action |
+|-----|--------|
+| `Q` | Quit |
+| `C` | Simulate incoming call |
 
-Q → Quit
+---
 
-C → Simulate incoming call
+## Gesture Reference
 
-Gesture Controls
-Volume Control
+> Volume and track controls are **disabled while the phone is ringing.**
 
-(Disabled while phone is ringing)
+### Volume — index finger vs. thumb tip (vertical, ε = 0.03)
+| Gesture | Action |
+|---------|--------|
+| Index above thumb | +5% volume |
+| Index below thumb | −5% volume |
 
-Pointing Up → Increase volume by 5%
+Cooldown: 0.5s
 
-Pointing Down → Decrease volume by 5%
+### Music — index finger vs. thumb tip (horizontal, ε = 0.04)
+| Gesture | Action |
+|---------|--------|
+| Index right of thumb | Next track |
+| Index left of thumb | Previous track |
 
-Detection compares the vertical position of the index fingertip relative to the thumb tip.
+Cooldown: 0.8s · Tracks cycle: `["Song A", "Song B", "Song C", "Song D"]`
 
-Cooldown: 0.5 seconds
+### Calls — thumb direction (extension threshold: 0.35× hand scale)
+| State | Gesture | Action |
+|-------|---------|--------|
+| Ringing | Thumb up | Accept |
+| Ringing | Thumb down | Reject |
+| In call | Thumb down | End call |
 
-Music Control
+Cooldown: 0.8s
 
-(Disabled while phone is ringing)
+---
 
-Pointing Right → Next track
-
-Pointing Left → Previous track
-
-Detection compares the horizontal position of the index fingertip relative to the thumb tip.
-
-Cooldown: 0.8 seconds
-
-Tracks cycle through:
-
-["Song A", "Song B", "Song C", "Song D"]
-
-Call Handling
-
-Press C to simulate an incoming call.
-
-While Ringing:
-
-Thumb Up → Accept call
-
-Thumb Down → Reject call
-
-While In Call:
-
-Thumb Down → End call
-
-Thumb detection is based on:
-
-Hand scale (distance between wrist and middle finger MCP)
-
-Thumb extension length
-
-Vertical offset between thumb MCP and thumb tip
-
-Cooldown: 0.8 seconds
-
-System States
-
-The application uses a simple state machine:
-
+## State Machine
+```
 idle → ringing → in_call → idle
+```
 
-UI Elements
+---
 
-Volume bar (0–100%)
+## Camera Troubleshooting
 
-Current track display
+The app tries camera indices `(1, 0)` by default. If your camera isn't detected, edit `open_camera(...)`:
+```python
+open_camera((0, 1, 2))
+```
 
-Detected gesture label
+---
 
-Call status banner
+## Tuning
 
-Instruction text for call simulation
+| Parameter | Variable | Default |
+|-----------|----------|---------|
+| Volume cooldown | `vol_cooldown` | `0.5` |
+| Track cooldown | `track_cooldown` | `0.8` |
+| Call cooldown | `call_cooldown` | `0.8` |
+| Vertical sensitivity | `eps` in `pointing_gesture_vertical` | `0.03` |
+| Horizontal sensitivity | `eps` in `pointing_gesture_horizontal` | `0.04` |
+| Thumb extension | threshold in `thumb_direction` | `0.35 × hand_scale` |
 
-Camera Handling
+---
 
-The program attempts to open camera indices in this order:
+## Limitations
 
-(1, 0)
+- Single hand only
+- Heuristic-based detection — performance varies with lighting and hand orientation
+- Simulation only — no real vehicle or audio system integration
 
-If your camera does not open, modify:
+---
 
-open_camera((1,0))
-
-to try other indices such as:
-
-open_camera((0,1,2))
-
-Customization
-
-You can adjust:
-
-Volume cooldown:
-vol_cooldown = 0.5
-
-Track cooldown:
-track_cooldown = 0.8
-
-Call cooldown:
-call_cooldown = 0.8
-
-Gesture sensitivity:
-Vertical epsilon = 0.03
-Horizontal epsilon = 0.04
-Thumb extension threshold = 0.35 * hand_scale
-Thumb direction margin = 0.10 * hand_scale
-
-Limitations
-
-Supports one hand only
-
-Works best with good lighting
-
-Gesture detection is heuristic-based and may vary with hand orientation
-
-This is a simulation only — no real vehicle or audio system integration
-
-Project Structure
-├── car_control.py
+## Project Structure
+```
+├── gesture_car_control.py
 └── README.md
+```
